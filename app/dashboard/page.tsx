@@ -18,6 +18,7 @@ type Wallet = {
 export default function Dashboard() {
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [loading, setLoading] = useState(true)
+  const [copiedIdx, setCopiedIdx] = useState<number | null>(null)
 
   const fetchWallets = async () => {
     setLoading(true)
@@ -34,6 +35,13 @@ export default function Dashboard() {
   useEffect(() => {
     fetchWallets()
   }, [])
+
+  // Copy function
+  const handleCopy = async (address: string, idx: number) => {
+    await navigator.clipboard.writeText(address)
+    setCopiedIdx(idx)
+    setTimeout(() => setCopiedIdx(null), 1200)
+  }
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-fuchsia-900 p-4 flex flex-col items-center">
@@ -66,8 +74,18 @@ export default function Dashboard() {
             <tbody>
               {wallets.map((w, i) => (
                 <tr key={i} className="border-t border-fuchsia-900/30 hover:bg-fuchsia-900/10">
-                  <td className="py-2 px-4 font-mono break-all">
+                  <td className="py-2 px-4 font-mono break-all flex items-center gap-2">
                     {w.address}
+                    {w.address && w.address !== "Error" && (
+                      <button
+                        onClick={() => handleCopy(w.address, i)}
+                        className="ml-2 px-2 py-1 text-xs bg-fuchsia-800/70 text-white rounded hover:bg-fuchsia-600 transition"
+                        aria-label="Copy address"
+                        type="button"
+                      >
+                        {copiedIdx === i ? "Copied!" : "Copy"}
+                      </button>
+                    )}
                   </td>
                   <td className="py-2 px-4">
                     {typeof w.score === "number" ? w.score : "-"}
