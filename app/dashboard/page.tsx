@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { ConnectButton } from '@rainbow-me/rainbowkit'
+import { useAccount } from 'wagmi'
 
 type Wallet = {
   address: string
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [loading, setLoading] = useState(true)
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null)
+  const { isConnected, address } = useAccount()
 
   const fetchWallets = async () => {
     setLoading(true)
@@ -32,8 +34,8 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    fetchWallets()
-  }, [])
+    if (isConnected) fetchWallets()
+  }, [isConnected])
 
   // Copy function
   const handleCopy = async (address: string, idx: number) => {
@@ -51,67 +53,81 @@ export default function Dashboard() {
       <h1 className="text-3xl md:text-5xl font-bold text-white mb-8 text-center drop-shadow-xl">
         DegenWallet AI Leaderboard
       </h1>
-      <button
-        onClick={fetchWallets}
-        className="mb-6 px-6 py-2 rounded-xl text-lg bg-gradient-to-r from-pink-600 to-purple-700 text-white shadow hover:scale-105 transition"
-      >
-        Refresh
-      </button>
-      {loading ? (
-        <div className="text-gray-300">Loading wallets...</div>
-      ) : wallets.length === 0 ? (
-        <div className="text-gray-400">No wallet data.</div>
-      ) : (
-        <div className="w-full max-w-2xl">
-          <table className="w-full text-left bg-white/5 rounded-2xl overflow-hidden shadow-lg">
-            <thead>
-              <tr className="bg-black/30 text-fuchsia-300">
-                <th className="py-3 px-4">Address</th>
-                <th className="py-3 px-4">Score</th>
-                <th className="py-3 px-4">Winrate</th>
-                <th className="py-3 px-4">Last Seen</th>
-                <th className="py-3 px-4">Amount</th>
-                <th className="py-3 px-4">Token</th>
-              </tr>
-            </thead>
-            <tbody>
-              {wallets.map((w, i) => (
-                <tr key={i} className="border-t border-fuchsia-900/30 hover:bg-fuchsia-900/10">
-                  <td className="py-2 px-4 font-mono break-all flex items-center gap-2">
-                    {w.address}
-                    {w.address && w.address !== "Error" && (
-                      <button
-                        onClick={() => handleCopy(w.address, i)}
-                        className="ml-2 px-2 py-1 text-xs bg-fuchsia-800/70 text-white rounded hover:bg-fuchsia-600 transition"
-                        aria-label="Copy address"
-                        type="button"
-                      >
-                        {copiedIdx === i ? "Copied!" : "Copy"}
-                      </button>
-                    )}
-                  </td>
-                  <td className="py-2 px-4">
-                    {typeof w.score === "number" ? w.score : "-"}
-                  </td>
-                  <td className="py-2 px-4">
-                    {typeof w.winrate === "number"
-                      ? `${Math.round(w.winrate * 100)}%`
-                      : "-"}
-                  </td>
-                  <td className="py-2 px-4">
-                    {w.lastSeen ? new Date(w.lastSeen).toLocaleString() : "-"}
-                  </td>
-                  <td className="py-2 px-4">
-                    {typeof w.amount === "number" ? w.amount : "-"}
-                  </td>
-                  <td className="py-2 px-4">
-                    {w.token || "-"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {!isConnected ? (
+        <div className="mt-10 flex flex-col items-center">
+          <div className="text-lg text-fuchsia-200 mb-4">
+            Connect your wallet to unlock the latest degen trading signals and alpha wallets.
+          </div>
+          <ConnectButton />
         </div>
+      ) : (
+        <>
+          <div className="mb-2 text-gray-400 text-xs text-right w-full max-w-2xl pr-2 truncate">
+            Connected: <span className="font-mono text-fuchsia-300">{address}</span>
+          </div>
+          <button
+            onClick={fetchWallets}
+            className="mb-6 px-6 py-2 rounded-xl text-lg bg-gradient-to-r from-pink-600 to-purple-700 text-white shadow hover:scale-105 transition"
+          >
+            Refresh
+          </button>
+          {loading ? (
+            <div className="text-gray-300">Loading wallets...</div>
+          ) : wallets.length === 0 ? (
+            <div className="text-gray-400">No wallet data.</div>
+          ) : (
+            <div className="w-full max-w-2xl">
+              <table className="w-full text-left bg-white/5 rounded-2xl overflow-hidden shadow-lg">
+                <thead>
+                  <tr className="bg-black/30 text-fuchsia-300">
+                    <th className="py-3 px-4">Address</th>
+                    <th className="py-3 px-4">Score</th>
+                    <th className="py-3 px-4">Winrate</th>
+                    <th className="py-3 px-4">Last Seen</th>
+                    <th className="py-3 px-4">Amount</th>
+                    <th className="py-3 px-4">Token</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {wallets.map((w, i) => (
+                    <tr key={i} className="border-t border-fuchsia-900/30 hover:bg-fuchsia-900/10">
+                      <td className="py-2 px-4 font-mono break-all flex items-center gap-2">
+                        {w.address}
+                        {w.address && w.address !== "Error" && (
+                          <button
+                            onClick={() => handleCopy(w.address, i)}
+                            className="ml-2 px-2 py-1 text-xs bg-fuchsia-800/70 text-white rounded hover:bg-fuchsia-600 transition"
+                            aria-label="Copy address"
+                            type="button"
+                          >
+                            {copiedIdx === i ? "Copied!" : "Copy"}
+                          </button>
+                        )}
+                      </td>
+                      <td className="py-2 px-4">
+                        {typeof w.score === "number" ? w.score : "-"}
+                      </td>
+                      <td className="py-2 px-4">
+                        {typeof w.winrate === "number"
+                          ? `${Math.round(w.winrate * 100)}%`
+                          : "-"}
+                      </td>
+                      <td className="py-2 px-4">
+                        {w.lastSeen ? new Date(w.lastSeen).toLocaleString() : "-"}
+                      </td>
+                      <td className="py-2 px-4">
+                        {typeof w.amount === "number" ? w.amount : "-"}
+                      </td>
+                      <td className="py-2 px-4">
+                        {w.token || "-"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
     </main>
   )
