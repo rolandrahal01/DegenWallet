@@ -1,9 +1,18 @@
-// app/api/wallets/route.ts
-
-import { NextResponse } from 'next/server'
-import { fetchTopWallets } from '@/lib/walletScanner'
+import { NextResponse } from "next/server";
+import { fetchTopWallets } from "@/lib/walletScanner";
 
 export async function GET() {
-  const data = await fetchTopWallets('eth')
-  return NextResponse.json(data)
+  try {
+    const data = await fetchTopWallets("sol");
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error("API /wallets error:", error);
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : String(error)
+      },
+      { status: 500 }
+    );
+  }
 }
