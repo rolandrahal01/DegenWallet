@@ -1,8 +1,7 @@
-// app/dashboard/page.tsx
-
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import { ConnectButton } from '@rainbow-me/rainbowkit'
 
 type Wallet = {
   address: string
@@ -45,6 +44,10 @@ export default function Dashboard() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-fuchsia-900 p-4 flex flex-col items-center">
+      {/* Sticky Wallet Connect Button */}
+      <div className="w-full flex justify-end max-w-2xl pb-4">
+        <ConnectButton />
+      </div>
       <h1 className="text-3xl md:text-5xl font-bold text-white mb-8 text-center drop-shadow-xl">
         DegenWallet AI Leaderboard
       </h1>
