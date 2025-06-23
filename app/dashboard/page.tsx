@@ -25,7 +25,7 @@ export default function Dashboard() {
       const res = await fetch('/api/wallets')
       const data = await res.json()
       setWallets(data)
-    } catch (e) {
+    } catch {
       setWallets([{ address: "Error", error: "Could not load wallets" }])
     }
     setLoading(false)
